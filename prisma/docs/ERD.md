@@ -50,6 +50,7 @@ CASH_ON_DELIVERY CASH_ON_DELIVERY
     String state "❓"
     String postalCode "❓"
     String country 
+    String phone "❓"
     Float lat 
     Float lng 
     Boolean isDefault 

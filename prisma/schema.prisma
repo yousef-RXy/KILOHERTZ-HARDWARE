@@ -60,6 +60,7 @@ model Address {
   state      String?
   postalCode String?
   country    String   @default("Egypt")
+  phone      String?
   lat        Float
   lng        Float
   isDefault  Boolean  @default(false)
