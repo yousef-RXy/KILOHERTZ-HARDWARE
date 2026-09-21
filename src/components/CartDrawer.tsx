@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useCart } from "@/context/CartContext";
 
@@ -120,11 +121,12 @@ export function CartDrawer() {
                     <div className="flex items-start gap-3">
                       {/* Thumbnail */}
                       <div className="w-16 h-16 rounded bg-surface-container-low border border-outline-variant p-1 flex items-center justify-center shrink-0 relative overflow-hidden">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
+                        <Image
                           alt={item.name}
-                          className="w-full h-full object-contain"
+                          className="object-contain p-1"
                           src={item.image}
+                          fill
+                          sizes="64px"
                         />
                       </div>
                       <div className="flex-1 min-w-0">

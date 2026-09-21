@@ -52,6 +52,7 @@ export function Header({ cartCount, onCartClick, minimal = false }: HeaderProps)
   const [selectedIndex, setSelectedIndex] = useState<number>(-1);
 
   const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
   const cart = useCart();
   const displayCount =
     cartCount !== undefined ? cartCount : cart.isHydrated ? cart.itemCount : 0;
@@ -59,6 +60,7 @@ export function Header({ cartCount, onCartClick, minimal = false }: HeaderProps)
 
   const searchContainerRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const mobileSearchInputRef = useRef<HTMLInputElement>(null);
 
   // Authentication status check
   useEffect(() => {
@@ -137,6 +139,7 @@ export function Header({ cartCount, onCartClick, minimal = false }: HeaderProps)
 
   const handleSelectProduct = (slug: string) => {
     setIsSearchOpen(false);
+    setIsMobileSearchOpen(false);
     setSearchQuery("");
     router.push(`/products/${slug}`);
   };
@@ -166,17 +169,160 @@ export function Header({ cartCount, onCartClick, minimal = false }: HeaderProps)
       }
     } else if (e.key === "Escape") {
       setIsSearchOpen(false);
+      setIsMobileSearchOpen(false);
       searchInputRef.current?.blur();
+      mobileSearchInputRef.current?.blur();
     }
   };
 
+  const renderResultsList = () => (
+    searchResults.length > 0 ? (
+      searchResults.map((product, idx) => {
+        const variant = product.variants[0];
+        const attrs = variant?.attributes || {};
+        const price = variant?.priceOverride ?? product.basePrice;
+        const imageUrl = attrs.image || DEFAULT_IMAGE;
+        const isSelected = selectedIndex === idx;
+
+        return (
+          <div
+            key={product.id}
+            onClick={() => handleSelectProduct(product.slug)}
+            onMouseEnter={() => setSelectedIndex(idx)}
+            className={`p-3 flex items-center gap-3 cursor-pointer transition-colors ${
+              isSelected
+                ? "bg-surface-container-high"
+                : "hover:bg-surface-container-low"
+            }`}
+          >
+            {/* Thumbnail */}
+            <div className="w-11 h-11 rounded border border-outline-variant bg-surface-container-lowest p-1 flex items-center justify-center shrink-0 overflow-hidden relative">
+              <Image
+                src={imageUrl}
+                alt={product.name}
+                width={40}
+                height={40}
+                className="object-contain w-full h-full"
+                unoptimized
+              />
+            </div>
+
+            {/* Product Info */}
+            <div className="flex-1 min-w-0">
+              <div className="font-headline-sm text-xs font-semibold text-on-surface truncate">
+                {product.name}
+              </div>
+
+              <div className="font-label-sm text-[11px] text-on-surface-variant truncate font-mono mt-0.5">
+                {attrs.capacity ? `${attrs.capacity} • ` : ""}
+                {attrs.speed ? `${attrs.speed} • ` : ""}
+                {attrs.interface || variant?.sku || "Precision Spec"}
+              </div>
+
+              <div className="flex items-center gap-2 mt-1">
+                <span className="font-metric-tabular text-xs font-bold text-on-surface">
+                  ${Number(price).toFixed(2)}
+                </span>
+                {variant?.stock !== undefined && (
+                  <span className="text-[10px] font-mono text-emerald-600 font-medium">
+                    {variant.stock > 0 ? "In Stock" : "Backorder"}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            <span className="material-symbols-outlined text-[16px] text-on-surface-variant shrink-0">
+              arrow_forward
+            </span>
+          </div>
+        );
+      })
+    ) : !isSearching ? (
+      <div className="p-6 text-center text-on-surface-variant font-body-sm text-xs space-y-1">
+        <span className="material-symbols-outlined text-2xl text-outline mb-1">
+          search_off
+        </span>
+        <p className="font-semibold text-on-surface">
+          No hardware matched &ldquo;{searchQuery}&rdquo;
+        </p>
+        <p className="text-[11px]">
+          Try searching for NVMe, 2TB, PCIe 5.0, AM5, or RTX.
+        </p>
+      </div>
+    ) : null
+  );
+
   return (
     <header className="fixed top-0 left-0 right-0 z-40 bg-surface-container-lowest/95 backdrop-blur-sm border-b border-outline-variant">
-      <div className="h-[60px] max-w-[1600px] mx-auto px-4 sm:px-8 flex items-center justify-between gap-6">
+      {/* Mobile Search Overlay Bar */}
+      {isMobileSearchOpen && !minimal && (
+        <div className="md:hidden absolute inset-0 bg-surface-container-lowest z-50 px-3 flex items-center gap-2 border-b border-outline-variant">
+          <button
+            type="button"
+            onClick={() => {
+              setIsMobileSearchOpen(false);
+              setIsSearchOpen(false);
+            }}
+            className="p-1.5 text-on-surface-variant hover:text-on-surface rounded cursor-pointer shrink-0"
+            aria-label="Close search"
+          >
+            <span className="material-symbols-outlined text-[20px]">arrow_back</span>
+          </button>
+          <div className="relative flex-1 flex items-center">
+            <span className="material-symbols-outlined absolute left-2.5 text-on-surface-variant text-[18px] pointer-events-none">
+              search
+            </span>
+            <input
+              ref={mobileSearchInputRef}
+              type="text"
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                if (!isSearchOpen) setIsSearchOpen(true);
+              }}
+              onKeyDown={handleKeyDown}
+              className="w-full pl-8 pr-8 py-1.5 bg-surface-container-low border border-outline-variant text-on-surface font-body-sm text-sm rounded-lg placeholder:text-on-surface-variant focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary"
+              placeholder="Search hardware..."
+              autoFocus
+              autoComplete="off"
+            />
+            {isSearching ? (
+              <span className="absolute right-2.5 w-3.5 h-3.5 border-2 border-secondary border-t-transparent rounded-full animate-spin" />
+            ) : searchQuery ? (
+              <button
+                type="button"
+                onClick={() => {
+                  setSearchQuery("");
+                  setSearchResults([]);
+                  setIsSearchOpen(false);
+                }}
+                className="absolute right-2 text-on-surface-variant hover:text-on-surface p-1 cursor-pointer"
+                aria-label="Clear search"
+              >
+                <span className="material-symbols-outlined text-[16px]">close</span>
+              </button>
+            ) : null}
+          </div>
+        </div>
+      )}
+
+      {/* Mobile Search Results Overlay Dropdown */}
+      {isMobileSearchOpen && isSearchOpen && searchQuery.trim().length > 0 && (
+        <div className="md:hidden fixed top-[60px] inset-x-0 bottom-0 bg-surface-container-lowest/98 backdrop-blur-md z-40 overflow-y-auto border-t border-outline-variant p-2 divide-y divide-outline-variant/40">
+          <div className="px-2 py-1 text-[11px] font-mono uppercase text-on-surface-variant font-bold tracking-wider">
+            {isSearching
+              ? "Scanning catalog..."
+              : `Matching Hardware (${searchResults.length})`}
+          </div>
+          {renderResultsList()}
+        </div>
+      )}
+
+      <div className="h-[60px] max-w-[1600px] mx-auto px-3 sm:px-8 flex items-center justify-between gap-2 sm:gap-6">
         {/* Left Branding */}
-        <div className="flex items-center gap-4 shrink-0">
-          <Link href="/" className="flex items-center gap-3 group">
-            <span className="font-label-md text-label-md tracking-wider uppercase text-primary font-bold group-hover:text-secondary transition-colors">
+        <div className="flex items-center gap-2 sm:gap-4 shrink-0">
+          <Link href="/" className="flex items-center gap-2 sm:gap-3 group">
+            <span className="font-label-sm sm:font-label-md text-xs sm:text-label-md tracking-normal sm:tracking-wider uppercase text-primary font-bold group-hover:text-secondary transition-colors whitespace-nowrap">
               KILOHERTZ // HARDWARE
             </span>
           </Link>
@@ -214,171 +360,112 @@ export function Header({ cartCount, onCartClick, minimal = false }: HeaderProps)
         )}
 
         {/* Right Search & Controls */}
-        <div className="flex items-center gap-4 shrink-0">
+        <div className="flex items-center gap-2 sm:gap-4 shrink-0">
           {!minimal && (
-            <div ref={searchContainerRef} className="relative flex items-center">
-              {/* Search Input Box */}
-              <div className="relative flex items-center">
-                <span className="material-symbols-outlined absolute left-2.5 text-on-surface-variant text-[18px] pointer-events-none">
-                  search
-                </span>
+            <>
+              {/* Mobile Search Trigger Icon Button */}
+              <button
+                type="button"
+                onClick={() => {
+                  setIsMobileSearchOpen(true);
+                  setTimeout(() => mobileSearchInputRef.current?.focus(), 50);
+                }}
+                className="md:hidden flex items-center justify-center w-8 h-8 rounded-lg border border-outline-variant bg-surface-container-lowest text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low transition-colors cursor-pointer"
+                title="Search Hardware"
+                aria-label="Open search"
+              >
+                <span className="material-symbols-outlined text-[18px]">search</span>
+              </button>
 
-                <input
-                  ref={searchInputRef}
-                  id="catalog-search-input"
-                  type="text"
-                  value={searchQuery}
-                  onFocus={() => {
-                    if (searchQuery.trim().length > 0) setIsSearchOpen(true);
-                  }}
-                  onChange={(e) => {
-                    setSearchQuery(e.target.value);
-                    if (!isSearchOpen) setIsSearchOpen(true);
-                  }}
-                  onKeyDown={handleKeyDown}
-                  className="w-56 sm:w-72 pl-8 pr-16 py-1.5 bg-surface-container-lowest border border-outline-variant text-on-surface font-body-sm text-xs sm:text-sm rounded-lg placeholder:text-on-surface-variant focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary transition-all"
-                  placeholder="Search hardware..."
-                  autoComplete="off"
-                />
+              {/* Desktop Search Box */}
+              <div ref={searchContainerRef} className="hidden md:flex relative items-center">
+                <div className="relative flex items-center">
+                  <span className="material-symbols-outlined absolute left-2.5 text-on-surface-variant text-[18px] pointer-events-none">
+                    search
+                  </span>
 
-                {/* Right Indicator: Loading Spinner, Clear Button, or Ctrl+K */}
-                <div className="absolute right-2 flex items-center gap-1">
-                  {isSearching ? (
-                    <span className="w-3.5 h-3.5 border-2 border-secondary border-t-transparent rounded-full animate-spin" />
-                  ) : searchQuery ? (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setSearchQuery("");
-                        setSearchResults([]);
-                        setIsSearchOpen(false);
-                      }}
-                      className="text-on-surface-variant hover:text-on-surface p-0.5 rounded cursor-pointer"
-                      title="Clear search"
-                    >
-                      <span className="material-symbols-outlined text-[14px]">
-                        close
-                      </span>
-                    </button>
-                  ) : (
-                    <span className="hidden sm:inline-block bg-surface-container-low border border-outline-variant text-[10px] font-label-sm px-1.5 py-0.5 rounded text-on-surface-variant select-none font-mono">
-                      Ctrl+K
-                    </span>
-                  )}
-                </div>
-              </div>
+                  <input
+                    ref={searchInputRef}
+                    id="catalog-search-input"
+                    type="text"
+                    value={searchQuery}
+                    onFocus={() => {
+                      if (searchQuery.trim().length > 0) setIsSearchOpen(true);
+                    }}
+                    onChange={(e) => {
+                      setSearchQuery(e.target.value);
+                      if (!isSearchOpen) setIsSearchOpen(true);
+                    }}
+                    onKeyDown={handleKeyDown}
+                    className="w-48 lg:w-72 pl-8 pr-16 py-1.5 bg-surface-container-lowest border border-outline-variant text-on-surface font-body-sm text-xs sm:text-sm rounded-lg placeholder:text-on-surface-variant focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary transition-all"
+                    placeholder="Search hardware..."
+                    autoComplete="off"
+                  />
 
-              {/* Hybrid Search Results Dropdown */}
-              {isSearchOpen && searchQuery.trim().length > 0 && (
-                <div className="absolute top-full right-0 mt-2 w-[340px] sm:w-[480px] bg-surface-container-lowest border border-outline-variant rounded-xl shadow-2xl overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-150">
-                  {/* Dropdown Header */}
-                  <div className="px-3.5 py-2.5 bg-surface-container-low border-b border-outline-variant flex items-center justify-between">
-                    <span className="font-mono text-[11px] uppercase text-on-surface-variant font-bold tracking-wider">
-                      {isSearching
-                        ? "Scanning catalog..."
-                        : `Matching Hardware (${searchResults.length})`}
-                    </span>
-
-                  </div>
-
-                  {/* Results List */}
-                  <div className="max-h-[380px] overflow-y-auto divide-y divide-outline-variant/40">
-                    {searchResults.length > 0 ? (
-                      searchResults.map((product, idx) => {
-                        const variant = product.variants[0];
-                        const attrs = variant?.attributes || {};
-                        const price =
-                          variant?.priceOverride ?? product.basePrice;
-                        const imageUrl = attrs.image || DEFAULT_IMAGE;
-                        const isSelected = selectedIndex === idx;
-
-                        return (
-                          <div
-                            key={product.id}
-                            onClick={() => handleSelectProduct(product.slug)}
-                            onMouseEnter={() => setSelectedIndex(idx)}
-                            className={`p-3 flex items-center gap-3 cursor-pointer transition-colors ${
-                              isSelected
-                                ? "bg-surface-container-high"
-                                : "hover:bg-surface-container-low"
-                            }`}
-                          >
-                            {/* Thumbnail */}
-                            <div className="w-11 h-11 rounded border border-outline-variant bg-surface-container-lowest p-1 flex items-center justify-center shrink-0 overflow-hidden relative">
-                              <Image
-                                src={imageUrl}
-                                alt={product.name}
-                                width={40}
-                                height={40}
-                                className="object-contain w-full h-full"
-                                unoptimized
-                              />
-                            </div>
-
-                            {/* Product Info */}
-                            <div className="flex-1 min-w-0">
-                              <div className="font-headline-sm text-xs font-semibold text-on-surface truncate">
-                                {product.name}
-                              </div>
-
-                              <div className="font-label-sm text-[11px] text-on-surface-variant truncate font-mono mt-0.5">
-                                {attrs.capacity ? `${attrs.capacity} • ` : ""}
-                                {attrs.speed ? `${attrs.speed} • ` : ""}
-                                {attrs.interface || variant?.sku || "Precision Spec"}
-                              </div>
-
-                              <div className="flex items-center gap-2 mt-1">
-                                <span className="font-metric-tabular text-xs font-bold text-on-surface">
-                                  ${Number(price).toFixed(2)}
-                                </span>
-                                {variant?.stock !== undefined && (
-                                  <span className="text-[10px] font-mono text-emerald-600 font-medium">
-                                    {variant.stock > 0 ? "In Stock" : "Backorder"}
-                                  </span>
-                                )}
-                              </div>
-                            </div>
-
-                            <span className="material-symbols-outlined text-[16px] text-on-surface-variant shrink-0">
-                              arrow_forward
-                            </span>
-                          </div>
-                        );
-                      })
-                    ) : !isSearching ? (
-                      <div className="p-6 text-center text-on-surface-variant font-body-sm text-xs space-y-1">
-                        <span className="material-symbols-outlined text-2xl text-outline mb-1">
-                          search_off
+                  {/* Right Indicator: Loading Spinner, Clear Button, or Ctrl+K */}
+                  <div className="absolute right-2 flex items-center gap-1">
+                    {isSearching ? (
+                      <span className="w-3.5 h-3.5 border-2 border-secondary border-t-transparent rounded-full animate-spin" />
+                    ) : searchQuery ? (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSearchQuery("");
+                          setSearchResults([]);
+                          setIsSearchOpen(false);
+                        }}
+                        className="text-on-surface-variant hover:text-on-surface p-0.5 rounded cursor-pointer"
+                        title="Clear search"
+                      >
+                        <span className="material-symbols-outlined text-[14px]">
+                          close
                         </span>
-                        <p className="font-semibold text-on-surface">
-                          No hardware matched &ldquo;{searchQuery}&rdquo;
-                        </p>
-                        <p className="text-[11px]">
-                          Try searching for NVMe, 2TB, PCIe 5.0, AM5, or RTX.
-                        </p>
-                      </div>
-                    ) : null}
-                  </div>
-
-                  {/* Dropdown Footer Navigation Hint */}
-                  <div className="px-3.5 py-1.5 bg-surface-container-low border-t border-outline-variant text-[10px] font-mono text-on-surface-variant flex items-center justify-between select-none">
-                    <span>↑↓ navigate • Enter select</span>
-                    <span>Esc to close</span>
+                      </button>
+                    ) : (
+                      <span className="hidden sm:inline-block bg-surface-container-low border border-outline-variant text-[10px] font-label-sm px-1.5 py-0.5 rounded text-on-surface-variant select-none font-mono">
+                        Ctrl+K
+                      </span>
+                    )}
                   </div>
                 </div>
-              )}
-            </div>
+
+                {/* Desktop Hybrid Search Results Dropdown */}
+                {isSearchOpen && searchQuery.trim().length > 0 && (
+                  <div className="absolute top-full right-0 mt-2 w-[340px] sm:w-[480px] bg-surface-container-lowest border border-outline-variant rounded-xl shadow-2xl overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+                    {/* Dropdown Header */}
+                    <div className="px-3.5 py-2.5 bg-surface-container-low border-b border-outline-variant flex items-center justify-between">
+                      <span className="font-mono text-[11px] uppercase text-on-surface-variant font-bold tracking-wider">
+                        {isSearching
+                          ? "Scanning catalog..."
+                          : `Matching Hardware (${searchResults.length})`}
+                      </span>
+                    </div>
+
+                    {/* Results List */}
+                    <div className="max-h-[380px] overflow-y-auto divide-y divide-outline-variant/40">
+                      {renderResultsList()}
+                    </div>
+
+                    {/* Dropdown Footer Navigation Hint */}
+                    <div className="px-3.5 py-1.5 bg-surface-container-low border-t border-outline-variant text-[10px] font-mono text-on-surface-variant flex items-center justify-between select-none">
+                      <span>↑↓ navigate • Enter select</span>
+                      <span>Esc to close</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </>
           )}
 
           <div
-            className={`flex items-center gap-3 ${
-              !minimal ? "pl-2 border-l border-outline-variant" : ""
+            className={`flex items-center gap-2 sm:gap-3 ${
+              !minimal ? "pl-1.5 sm:pl-2 border-l border-outline-variant" : ""
             }`}
           >
             <button
               type="button"
               onClick={handleCartTrigger}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 bg-surface-container-lowest border border-outline-variant hover:bg-surface-container-low rounded text-on-surface transition-colors cursor-pointer"
+              className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-1.5 bg-surface-container-lowest border border-outline-variant hover:bg-surface-container-low rounded text-on-surface transition-colors cursor-pointer"
               title="Shopping Cart"
             >
               <span className="material-symbols-outlined text-[18px]">
@@ -403,7 +490,7 @@ export function Header({ cartCount, onCartClick, minimal = false }: HeaderProps)
             ) : (
               <Link
                 href="/login"
-                className="h-8 px-3 bg-surface-container-low border border-outline-variant hover:bg-primary hover:text-on-primary hover:border-primary text-on-surface flex items-center gap-1.5 rounded transition-all text-xs font-medium"
+                className="h-8 px-2.5 sm:px-3 bg-surface-container-low border border-outline-variant hover:bg-primary hover:text-on-primary hover:border-primary text-on-surface flex items-center gap-1.5 rounded transition-all text-xs font-medium"
                 title="Sign In"
               >
                 <span className="material-symbols-outlined text-[16px]">

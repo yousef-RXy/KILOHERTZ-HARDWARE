@@ -6,8 +6,8 @@ import {
   CategoryProduct,
 } from "./CategoryClient";
 
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
+// Cache category page with ISR revalidated every 60s
+export const revalidate = 60;
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -147,3 +147,16 @@ export default async function CategoryPage({ params }: PageProps) {
     />
   );
 }
+
+export async function generateStaticParams() {
+  try {
+    const categories = await prisma.category.findMany({
+      where: { deletedAt: null },
+      select: { slug: true },
+    });
+    return categories.map((c) => ({ slug: c.slug }));
+  } catch {
+    return [];
+  }
+}
+

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useState } from "react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
@@ -111,21 +112,21 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
       <main className="w-full pt-[60px] min-h-[calc(100vh-140px)] bg-surface">
         <div className="flex flex-col w-full">
           {/* Breadcrumbs */}
-          <section className="w-full bg-surface-container-low px-4 sm:px-8 py-3 border-b border-outline-variant">
+          <section className="w-full bg-surface-container-low px-4 sm:px-8 py-2.5 sm:py-3 border-b border-outline-variant">
             <div className="max-w-[1600px] mx-auto flex items-center justify-between gap-3 text-xs sm:text-sm">
-              <div className="flex items-center gap-2 text-on-surface-variant flex-wrap">
-                <Link href="/" className="text-primary font-medium hover:text-secondary transition-colors">
+              <div className="flex items-center gap-1.5 sm:gap-2 text-on-surface-variant flex-wrap text-xs sm:text-sm">
+                <Link href="/" className="text-primary font-medium hover:text-secondary transition-colors shrink-0">
                   Home
                 </Link>
-                <span>/</span>
+                <span className="shrink-0">/</span>
                 <Link
                   href={`/categories/${product.categorySlug}`}
-                  className="hover:text-primary transition-colors"
+                  className="hover:text-primary transition-colors shrink-0"
                 >
                   {product.categoryName}
                 </Link>
-                <span>/</span>
-                <span className="text-on-surface font-semibold truncate max-w-[240px] sm:max-w-none">
+                <span className="shrink-0">/</span>
+                <span className="text-on-surface font-semibold truncate max-w-[200px] sm:max-w-none">
                   {product.name}
                 </span>
               </div>
@@ -134,7 +135,7 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
 
           {/* Toast */}
           {toastMessage && (
-            <div className="fixed top-20 right-8 z-50 bg-primary text-on-primary px-4 py-2.5 rounded-lg shadow-xl border border-outline-variant flex items-center gap-2 text-sm font-medium animate-in fade-in slide-in-from-top-2">
+            <div className="fixed top-20 right-4 sm:right-8 z-50 bg-primary text-on-primary px-4 py-2.5 rounded-lg shadow-xl border border-outline-variant flex items-center gap-2 text-sm font-medium animate-in fade-in slide-in-from-top-2">
               <span className="material-symbols-outlined text-[18px] text-emerald-400">
                 check_circle
               </span>
@@ -143,46 +144,50 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
           )}
 
           {/* Main Viewport: Two Column Specification & Acquisition Matrix */}
-          <div className="w-full px-4 sm:px-8 py-8">
-            <div className="max-w-[1600px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          <div className="w-full px-3 sm:px-8 py-4 sm:py-8">
+            <div className="max-w-[1600px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-8 items-start">
               {/* Left Column: Image Viewer and Thumbnails */}
               <div className="lg:col-span-7 flex flex-col gap-4">
                 {/* Main Product Viewer */}
-                <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 sm:p-10 flex flex-col items-center justify-center relative min-h-[440px]">
-                  {/* Spec Badges */}
-                  <div className="absolute top-4 left-4 flex flex-wrap gap-2 z-10 text-xs font-mono">
-                    {attrs.formFactor && (
-                      <span className="bg-surface-container-low px-2 py-1 rounded text-on-surface font-medium border border-outline-variant">
-                        {attrs.formFactor}
-                      </span>
-                    )}
-                    {attrs.interface && (
-                      <span className="bg-surface-container-low px-2 py-1 rounded text-on-surface font-medium border border-outline-variant">
-                        {attrs.interface}
-                      </span>
-                    )}
-                    {currentVariant.stock > 0 && (
-                      <span className="bg-emerald-50 text-emerald-700 px-2 py-1 rounded font-medium border border-emerald-200">
-                        In Stock
-                      </span>
-                    )}
-                  </div>
+                <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-3 sm:p-8 flex flex-col justify-between relative min-h-[300px] sm:min-h-[440px]">
+                  {/* Top Spec Badges & Counter Header - Responsive Flex Row */}
+                  <div className="w-full flex items-start justify-between gap-2 z-10">
+                    <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 text-[11px] sm:text-xs font-mono">
+                      {attrs.formFactor && (
+                        <span className="bg-surface-container-low px-2 py-0.5 sm:py-1 rounded text-on-surface font-medium border border-outline-variant">
+                          {attrs.formFactor}
+                        </span>
+                      )}
+                      {attrs.interface && (
+                        <span className="bg-surface-container-low px-2 py-0.5 sm:py-1 rounded text-on-surface font-medium border border-outline-variant">
+                          {attrs.interface}
+                        </span>
+                      )}
+                      {currentVariant.stock > 0 && (
+                        <span className="bg-emerald-50 text-emerald-700 px-2 py-0.5 sm:py-1 rounded font-medium border border-emerald-200">
+                          In Stock
+                        </span>
+                      )}
+                    </div>
 
-                  {/* Image Counter Overlay (Only retain image number) */}
-                  <div className="absolute top-4 right-4 z-10 text-xs bg-surface-container-low px-2.5 py-1 rounded-md text-on-surface-variant flex items-center gap-1.5 font-mono border border-outline-variant">
-                    <span className="material-symbols-outlined text-[14px]">
-                      photo_camera
-                    </span>
-                    <span>{activeAngle.readout}</span>
+                    {/* Image Counter Overlay Badge */}
+                    <div className="shrink-0 text-[11px] sm:text-xs bg-surface-container-low px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-md text-on-surface-variant flex items-center gap-1 font-mono border border-outline-variant">
+                      <span className="material-symbols-outlined text-[13px] sm:text-[14px]">
+                        photo_camera
+                      </span>
+                      <span>{activeAngle.readout}</span>
+                    </div>
                   </div>
 
                   {/* Primary Product Image */}
-                  <div className="w-full max-w-[540px] h-[340px] flex items-center justify-center relative my-4">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
+                  <div className="w-full max-w-[540px] h-[220px] sm:h-[340px] mx-auto flex items-center justify-center relative my-2 sm:my-4">
+                    <Image
                       alt={activeAngle.alt}
-                      className="max-h-full max-w-full object-contain filter drop-shadow-sm transition-opacity duration-150"
+                      className="object-contain filter drop-shadow-sm transition-opacity duration-150"
                       src={activeAngle.image}
+                      fill
+                      priority
+                      sizes="(max-width: 768px) 100vw, 540px"
                     />
                   </div>
                 </div>
@@ -200,12 +205,13 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
                           : "bg-surface-container-lowest border-outline-variant hover:bg-surface-container-low"
                       }`}
                     >
-                      <div className="w-full h-16 bg-surface-container-low rounded flex items-center justify-center overflow-hidden">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
+                      <div className="w-full h-16 bg-surface-container-low rounded flex items-center justify-center overflow-hidden relative">
+                        <Image
                           alt={`View ${angle.label}`}
-                          className="h-12 w-auto object-contain"
+                          className="object-contain p-1"
                           src={angle.image}
+                          fill
+                          sizes="120px"
                         />
                       </div>
                       <div className="w-full text-center">

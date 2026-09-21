@@ -2,6 +2,7 @@
 
 import { useCart } from "@/context/CartContext";
 import { useState } from "react";
+import Image from "next/image";
 
 export function CartConflictModal() {
   const { conflictData, resolveMerge, resolveKeepLocal, resolveKeepRemote } = useCart();
@@ -90,9 +91,8 @@ export function CartConflictModal() {
             <div className="p-3 divide-y divide-surface-container overflow-y-auto max-h-60 flex-1">
               {localItems.map((item) => (
                 <div key={item.id + item.sku} className="py-2.5 first:pt-0 last:pb-0 flex items-center gap-3">
-                  <div className="w-10 h-10 bg-surface-container-lowest border border-outline-variant rounded p-0.5 shrink-0 flex items-center justify-center">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={item.image} alt={item.name} className="w-full h-full object-contain" />
+                  <div className="w-10 h-10 bg-surface-container-lowest border border-outline-variant rounded p-0.5 shrink-0 flex items-center justify-center relative overflow-hidden">
+                    <Image src={item.image} alt={item.name} fill sizes="40px" className="object-contain p-0.5" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-xs font-semibold text-on-surface truncate">
@@ -134,9 +134,8 @@ export function CartConflictModal() {
             <div className="p-3 divide-y divide-surface-container overflow-y-auto max-h-60 flex-1">
               {remoteItems.map((item) => (
                 <div key={item.id + item.sku} className="py-2.5 first:pt-0 last:pb-0 flex items-center gap-3">
-                  <div className="w-10 h-10 bg-surface-container-lowest border border-outline-variant rounded p-0.5 shrink-0 flex items-center justify-center">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={item.image} alt={item.name} className="w-full h-full object-contain" />
+                  <div className="w-10 h-10 bg-surface-container-lowest border border-outline-variant rounded p-0.5 shrink-0 flex items-center justify-center relative overflow-hidden">
+                    <Image src={item.image} alt={item.name} fill sizes="40px" className="object-contain p-0.5" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-xs font-semibold text-on-surface truncate">

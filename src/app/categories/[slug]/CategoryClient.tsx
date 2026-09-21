@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useState, useMemo } from "react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
@@ -371,16 +372,17 @@ export function CategoryClient({
                           {/* Image Box */}
                           <Link
                             href={`/products/${product.slug}`}
-                            className="w-full h-52 bg-surface-container-lowest border border-outline-variant rounded p-3 mb-3 flex items-center justify-center relative group block"
+                            className="w-full h-52 bg-surface-container-lowest border border-outline-variant rounded p-3 mb-3 flex items-center justify-center relative group block overflow-hidden"
                           >
-                            <span className="absolute top-2 left-2 font-label-sm text-[10px] bg-surface-container-low px-1.5 py-0.5 border border-outline-variant text-on-surface-variant uppercase font-mono">
+                            <span className="absolute top-2 left-2 z-10 font-label-sm text-[10px] bg-surface-container-low px-1.5 py-0.5 border border-outline-variant text-on-surface-variant uppercase font-mono">
                               {product.categoryBadge}
                             </span>
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img
+                            <Image
                               alt={product.name}
-                              className="max-h-full max-w-full object-contain group-hover:scale-105 transition-transform duration-200"
+                              className="object-contain p-3 group-hover:scale-105 transition-transform duration-200"
                               src={product.image}
+                              fill
+                              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                             />
                           </Link>
 

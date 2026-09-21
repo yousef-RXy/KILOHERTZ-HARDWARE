@@ -6,8 +6,8 @@ import {
   SerializedVariant,
 } from "./ProductDetailClient";
 
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
+// Cache product page with ISR revalidated every 60s
+export const revalidate = 60;
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -73,3 +73,16 @@ export default async function ProductDetailPage({ params }: PageProps) {
 
   return <ProductDetailClient product={serializedProduct} />;
 }
+
+export async function generateStaticParams() {
+  try {
+    const products = await prisma.product.findMany({
+      where: { deletedAt: null, isActive: true },
+      select: { slug: true },
+    });
+    return products.map((p) => ({ slug: p.slug }));
+  } catch {
+    return [];
+  }
+}
+

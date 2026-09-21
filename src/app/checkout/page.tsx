@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect, Suspense } from "react";
 import dynamic from "next/dynamic";
@@ -792,12 +793,14 @@ function CheckoutContent() {
               <div className="divide-y divide-outline-variant/60 max-h-80 overflow-y-auto pr-1">
                 {cart.items.map((item) => (
                   <div key={item.sku} className="py-3 flex items-start gap-3 text-xs">
-                    <div className="w-12 h-12 rounded bg-surface-container-low border border-outline-variant flex items-center justify-center p-1 shrink-0">
+                    <div className="w-12 h-12 rounded bg-surface-container-low border border-outline-variant flex items-center justify-center p-1 shrink-0 relative overflow-hidden">
                       {item.image ? (
-                        <img
+                        <Image
                           src={item.image}
                           alt={item.name}
-                          className="w-full h-full object-contain"
+                          fill
+                          sizes="48px"
+                          className="object-contain p-0.5"
                         />
                       ) : (
                         <span className="material-symbols-outlined text-on-surface-variant text-[20px]">

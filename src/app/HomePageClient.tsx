@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useState, useMemo } from "react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
@@ -149,11 +150,13 @@ export function HomePageClient({ categories, products }: HomePageClientProps) {
                     <span>PRO-GRADE WORKSTATION MOUNT</span>
                   </div>
                   <div className="relative w-full h-[250px] flex items-center justify-center overflow-hidden bg-surface-container-lowest">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
+                    <Image
                       alt="Studio product photography of a high-end workstation ATX motherboard"
-                      className="w-full h-full object-contain p-1"
+                      className="object-contain p-1"
                       src="https://lh3.googleusercontent.com/aida-public/AB6AXuAcuXZVWoKLK8WEZHedd8RNY2wh7CzEX3a-shH7dF3b4sOVyjShKp53ms6pS20ypbACfYKK7kdpRO-9bj2h75U43AzG9hxQBnaRIPNMg3_BhGeWHW_bhSpL-DeAf-JD1_NJacsRkiOoEvlJ1BothDOu0gROgz_YnmVXsnaaQp_ON6zKQXa0mVjpQlPg764IRt7PmNh9KTYCCfm4Es0v_AAWb1-mz4x4IKuGP08KW5BGqb0zdubBbXIU"
+                      fill
+                      priority
+                      sizes="(max-width: 640px) 100vw, 460px"
                     />
                   </div>
                   <div className="flex items-center justify-between pt-2 border-t border-outline-variant font-label-sm text-label-sm text-on-surface-variant font-mono">
@@ -278,16 +281,17 @@ export function HomePageClient({ categories, products }: HomePageClientProps) {
                       {/* Image Area */}
                       <Link
                         href={`/products/${product.slug}`}
-                        className="w-full h-52 bg-surface-container-lowest border border-outline-variant rounded p-3 mb-3 flex items-center justify-center relative block group"
+                        className="w-full h-52 bg-surface-container-lowest border border-outline-variant rounded p-3 mb-3 flex items-center justify-center relative block group overflow-hidden"
                       >
-                        <span className="absolute top-2 left-2 font-label-sm text-[10px] bg-surface-container-low px-1.5 py-0.5 border border-outline-variant text-on-surface-variant uppercase font-mono">
+                        <span className="absolute top-2 left-2 z-10 font-label-sm text-[10px] bg-surface-container-low px-1.5 py-0.5 border border-outline-variant text-on-surface-variant uppercase font-mono">
                           {product.categoryBadge}
                         </span>
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
+                        <Image
                           alt={product.name}
-                          className="max-h-full max-w-full object-contain group-hover:scale-105 transition-transform duration-200"
+                          className="object-contain p-3 group-hover:scale-105 transition-transform duration-200"
                           src={product.image}
+                          fill
+                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                         />
                       </Link>
                       {/* SKU */}

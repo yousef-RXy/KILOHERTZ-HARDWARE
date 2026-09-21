@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useEffect, useRef } from "react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
@@ -216,12 +217,13 @@ export function OrderConfirmationClient({ order, isUnpaidStripe = false }: Order
                         <tr key={item.id} className="hover:bg-surface-container-low/40 transition-colors">
                           <td className="py-4 px-4">
                             <div className="flex items-center gap-4">
-                              <div className="w-12 h-12 bg-surface-container-low border border-outline-variant rounded-lg p-1 flex items-center justify-center shrink-0">
-                                {/* eslint-disable-next-line @next/next/no-img-element */}
-                                <img
-                                  className="w-full h-full object-contain"
+                              <div className="w-12 h-12 bg-surface-container-low border border-outline-variant rounded-lg p-1 flex items-center justify-center shrink-0 relative overflow-hidden">
+                                <Image
+                                  className="object-contain p-0.5"
                                   alt={item.title}
                                   src={item.image}
+                                  fill
+                                  sizes="48px"
                                 />
                               </div>
                               <div className="min-w-0">

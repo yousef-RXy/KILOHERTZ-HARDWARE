@@ -1,8 +1,8 @@
 import { prisma } from "@/lib/prisma";
 import { HomePageClient, SerializedCategory, SerializedProduct } from "./HomePageClient";
 
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
+// Cache homepage using Incremental Static Regeneration (ISR) revalidated every 60 seconds
+export const revalidate = 60;
 
 const CATEGORY_META: Record<string, { code: string; tag: string }> = {
   storage: { code: "CAT-MEM-01", tag: "PCIe 4 / 5 • NVMe" },
